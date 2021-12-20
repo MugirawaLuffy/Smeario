@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
 import renderer.Shader;
+import renderer.Texture;
 import util.Time;
 
 import java.awt.event.KeyEvent;
@@ -18,10 +19,10 @@ public class LevelEditorScene extends Scene{
 
     private float[] vertexArray={
             //position              color           uv coords
-            100.5f,0.5f,0f,       1f,0f,0f,1f,   1,0,   //Bottom right  0
-            0.5f, 100.5f,0f,      0f,1f,0f,1f,   0,1,   //Top left      1
-            100.5f,100.5f,0f,     1f,0f,1f,1f,   1,1,   //Top right     2
-            0.5f,0.5f,0f,         1f,1f,0f,1f,   0,0    //Bottom left   3
+            100.5f,0.5f,0f,       1f,0f,0f,1f,   1,1,   //Bottom right  0
+            0.5f, 100.5f,0f,      0f,1f,0f,1f,   0,0,   //Top left      1
+            100.5f,100.5f,0f,     1f,0f,1f,1f,   1,0,   //Top right     2
+            0.5f,0.5f,0f,         1f,1f,0f,1f,   0,1    //Bottom left   3
     };
     private int[] elementArray={2,1,0,0,1,3};
     private int vaoID,vboID,eboID;
@@ -51,12 +52,18 @@ public class LevelEditorScene extends Scene{
 
     private int vertexID, fragmentID, shaderProgram;
 
+
     private Shader defaultShader;
+    private Texture testTexture;
+
+
     @Override
     public void __init__() {
         this.camera = new Camera(new Vector2f());
         defaultShader = new Shader("assets/shaders/default.glsl");
         defaultShader.compile();
+
+        this.testTexture = new Texture("assets/images/testImage.png");
 
 
 
@@ -99,6 +106,10 @@ public class LevelEditorScene extends Scene{
     public void update(float dt) {
         camera.position.x -= dt *50.0f;
         defaultShader.use();
+
+        defaultShader.uploadTexture("TEX_SAMPLER", 0);
+        glActiveTexture(GL_TEXTURE);
+        testTexture.bind();
 
         defaultShader.uploadMat4f("uProj", camera.getProjectionMatrix());
         defaultShader.uploadMat4f("uView", camera.getViewMatrix());
