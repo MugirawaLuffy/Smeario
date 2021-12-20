@@ -30,6 +30,10 @@ public class Window {
          r = b = g = a = 1.0f;
     }
 
+    public static Scene getScene() {
+        return get().currentScene;
+    }
+
     public static void changeScene(int newScene) {
         switch(newScene) {
             case 0:

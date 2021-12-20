@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Scene {
-    protected Camera camera;
+    public Camera camera;
     private boolean isRunning = false;
     protected List<GameObject> gameObjects = new ArrayList<GameObject>();
 
@@ -32,4 +32,8 @@ public abstract class Scene {
     }
 
     public abstract void update(float dt);
+
+    public Camera camera() {
+        return this.camera;
+    }
 }
