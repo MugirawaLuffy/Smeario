@@ -81,7 +81,7 @@ public class GameObject {
         return this.zIndex;
     }
 
-    public int uid() {
+    public int getUid() {
         return this.uid;
     }
 
