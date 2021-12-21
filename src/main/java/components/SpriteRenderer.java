@@ -9,6 +9,8 @@ import renderer.Texture;
 import java.awt.*;
 
 public class SpriteRenderer extends Component {
+    boolean isDirty = false; // dirty flag
+
     private Vector4f color;
 
     private Sprite sprite;
@@ -27,11 +29,15 @@ public class SpriteRenderer extends Component {
 
     @Override
     public void start() {
+        this.lastTransform = gameObject.transform.copy();
     }
 
     @Override
     public void update(float dt) {
-
+        if(!this.lastTransform.equals(this.gameObject.transform)) { //Transformation has changed
+            this.gameObject.transform.copy(this.lastTransform);
+            this.isDirty = true;
+        }
     }
 
     public Vector4f getColor() {
@@ -48,9 +54,19 @@ public class SpriteRenderer extends Component {
 
     public void setSprite(Sprite _sprite) {
         this.sprite = _sprite;
+        this.isDirty = true;
     }
 
     public void setColor(Vector4f _color) {
-        this.color = _color;
+        if(this.color.equals(color))
+            this.isDirty = true;
+    }
+
+    public boolean isDirty() {
+        return this.isDirty;
+    }
+
+    public void setClean() {
+        this.isDirty = false;
     }
 }

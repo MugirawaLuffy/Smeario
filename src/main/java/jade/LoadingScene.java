@@ -1,23 +1,19 @@
 package jade;
 
-import components.Sprite;
 import components.SpriteRenderer;
 import components.Spritesheet;
 import org.joml.Vector2f;
-import org.joml.Vector4f;
-import renderer.Shader;
-import renderer.Texture;
 import util.AssetPool;
 
 
-public class LevelEditorScene extends Scene{
+public class LoadingScene extends Scene{
     Spritesheet sprites;
     private GameObject obj1;
     private int spriteIndex = 0;
     private float spriteFlipTime = 0.2f;
     private float spriteFlipTimeLeft = 0.0F;
 
-    public LevelEditorScene() {
+    public LoadingScene() {
 
     }
 
