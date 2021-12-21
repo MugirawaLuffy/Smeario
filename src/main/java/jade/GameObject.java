@@ -7,17 +7,26 @@ public class GameObject {
     private String name;
     private List<Component> components;
     public Transform transform;
+    private int zIndex;
 
     public GameObject(String _name) {
         this.name = _name;
         this.components = new ArrayList<>();
         this.transform = new Transform();
+        this.zIndex = 0;
     }
 
     public GameObject(String _name, Transform _transform) {
         this.name = _name;
         this.components = new ArrayList<>();
         this.transform = _transform;
+        this.zIndex = 0;
+    }
+    public GameObject(String _name, Transform _transform, int _zIndex) {
+        this.name = _name;
+        this.components = new ArrayList<>();
+        this.transform = _transform;
+        this.zIndex = _zIndex;
     }
 
     public <T extends Component> T getComponent(Class<T> componentClass) {
@@ -59,5 +68,9 @@ public class GameObject {
         for(int i = 0; i < components.size(); i++) {
             components.get(i).start();
         }
+    }
+
+    public int zIndex() {
+        return this.zIndex;
     }
 }

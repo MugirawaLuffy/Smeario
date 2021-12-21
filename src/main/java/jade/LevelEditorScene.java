@@ -32,7 +32,8 @@ public class LevelEditorScene extends Scene{
         obj1.addComponent(new SpriteRenderer(sprites.getSprite(0)));
         this.addGameObjectToScene(obj1);
 
-        GameObject obj2 = new GameObject("Object 2", new Transform(new Vector2f(400, 50), new Vector2f(256, 256)));
+        GameObject obj2 = new GameObject("Object 2",
+                new Transform(new Vector2f(400, 50), new Vector2f(256, 256)), -1);
         obj2.addComponent(new SpriteRenderer(sprites.getSprite(14)));
         this.addGameObjectToScene(obj2);
     }

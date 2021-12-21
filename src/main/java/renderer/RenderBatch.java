@@ -12,7 +12,7 @@ import java.util.List;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
 import static org.lwjgl.opengl.GL30.*;
 
-public class RenderBatch { //this is gonna do the heavy lifting
+public class RenderBatch implements Comparable<RenderBatch> { //this is gonna do the heavy lifting
 
        //=========== vertex layout ===========================================================//
       //  Pos                        Color                        tex coords        tex ID   //
@@ -42,6 +42,8 @@ public class RenderBatch { //this is gonna do the heavy lifting
     private int maxBatchSize;
     private Shader shader;
 
+    private int zIndex;
+
     public RenderBatch(int maxBatchSize) {
         shader = AssetPool.getShader("assets/shaders/default.glsl");
         this.sprites = new SpriteRenderer[maxBatchSize];
@@ -53,6 +55,20 @@ public class RenderBatch { //this is gonna do the heavy lifting
         this.numSprites = 0;
         this.hasRoom = true;
         this.textures = new ArrayList<>();
+        this.zIndex = 0;
+    }
+    public RenderBatch(int maxBatchSize, int _zIndex) {
+        shader = AssetPool.getShader("assets/shaders/default.glsl");
+        this.sprites = new SpriteRenderer[maxBatchSize];
+        this.maxBatchSize = maxBatchSize;
+
+        // 4 vertices quads
+        vertices = new float[maxBatchSize * 4 * VERTEX_SIZE];
+
+        this.numSprites = 0;
+        this.hasRoom = true;
+        this.textures = new ArrayList<>();
+        this.zIndex = _zIndex;
     }
 
     public void start() {
@@ -233,5 +249,14 @@ public class RenderBatch { //this is gonna do the heavy lifting
     }
     public boolean hasTexture(Texture tex) {
         return this.textures.contains(tex);
+    }
+
+    public int zIndex() {
+        return this.zIndex;
+    }
+
+    @Override
+    public int compareTo(RenderBatch o) {
+        return Integer.compare(this.zIndex, o.zIndex);
     }
 }
