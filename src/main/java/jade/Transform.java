@@ -22,4 +22,13 @@ public class Transform {
         this.position = _position;
         this.scale = _scale;
     }
+
+    public Transform copy() {
+        return new Transform(new Vector2f(this.position), new Vector2f(this.scale));
+    }
+
+    public void copy(Transform to) {
+        to.position.set(this.position);
+        to.scale.set(this.scale);
+    }
 }

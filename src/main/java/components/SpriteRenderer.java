@@ -1,6 +1,7 @@
 package components;
 
 import jade.Component;
+import jade.Transform;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import renderer.Texture;
@@ -9,16 +10,18 @@ import java.awt.*;
 
 public class SpriteRenderer extends Component {
     private Vector4f color;
-    private Vector2f[] texCoords;
-    private Texture texture;
+
+    private Sprite sprite;
+    private Transform lastTransform;
+
 
     public SpriteRenderer(Vector4f color) {
         this.color = color;
-        this.texture = null;
+        this.sprite = new Sprite(null);
     }
 
-    public SpriteRenderer(Texture texture) {
-        this.texture = texture;
+    public SpriteRenderer(Sprite spr) {
+        this.sprite = spr;
         this.color = new Vector4f(1, 1, 1, 1);
     }
 
@@ -36,16 +39,18 @@ public class SpriteRenderer extends Component {
     }
 
     public Texture getTexture() {
-        return this.texture;
+        return sprite.getTexture();
     }
 
     public Vector2f[] getTexCoords() {
-        Vector2f[] texCoords = {
-                new Vector2f(1, 1),
-                new Vector2f(1, 0),
-                new Vector2f(0, 0),
-                new Vector2f(0, 1)
-        };
-        return texCoords;
+        return sprite.getTexCoords();
+    }
+
+    public void setSprite(Sprite _sprite) {
+        this.sprite = _sprite;
+    }
+
+    public void setColor(Vector4f _color) {
+        this.color = _color;
     }
 }
