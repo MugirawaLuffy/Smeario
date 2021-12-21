@@ -10,107 +10,109 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
-    private ImGuiLayer imguiLayer;
-
-    private long glfwWindow;
-
     private int width, height;
     private String title;
-    public float r,g,b,a;
+    private long glfwWindow;
+    private ImGuiLayer imguiLayer;
 
-    private static Window window = null; // Singleton
+    public float r, g, b, a;
+    private boolean fadeToBlack = false;
 
-    private static Scene currentScene = null;
+    private static Window window = null;
+
+    private static Scene currentScene;
 
     private Window() {
         this.width = 1920;
         this.height = 1080;
-
-        this.title = "Smeario - Mario on CRACK";
-         r = b = g = a = 1.0f;
-    }
-
-    public static Scene getScene() {
-        return get().currentScene;
+        this.title = "Mario";
+        r = 1;
+        b = 1;
+        g = 1;
+        a = 1;
     }
 
     public static void changeScene(int newScene) {
-        switch(newScene) {
+        switch (newScene) {
             case 0:
                 currentScene = new LevelEditorScene();
-                currentScene.__init__();
-                currentScene.start();
                 break;
             case 1:
                 currentScene = new LevelScene();
-                currentScene.__init__();
-                currentScene.start();
                 break;
             default:
-                assert false: "Unknown scene '" + newScene + "'";
+                assert false : "Unknown scene '" + newScene + "'";
+                break;
         }
+
+        currentScene.load();
+        currentScene.__init__();
+        currentScene.start();
     }
 
     public static Window get() {
-        if(Window.window == null) {
+        if (Window.window == null) {
             Window.window = new Window();
         }
 
         return Window.window;
     }
 
+    public static Scene getScene() {
+        return get().currentScene;
+    }
+
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
-        __init__();
-        __loop__();
+        init();
+        loop();
 
-        //Free memory
+        // Free the memory
         glfwFreeCallbacks(glfwWindow);
         glfwDestroyWindow(glfwWindow);
 
-        //Terminate glfw and free error callback
+        // Terminate GLFW and the free the error callback
         glfwTerminate();
         glfwSetErrorCallback(null).free();
     }
 
-    public void __init__() {
-        // Setup error callback to console.out
+    public void init() {
+        // Setup an error callback
         GLFWErrorCallback.createPrint(System.err).set();
 
-        //Initialize GLFW
-        if(!glfwInit()) {
-            throw new IllegalStateException("Unable to initialize glfw.");
+        // Initialize GLFW
+        if (!glfwInit()) {
+            throw new IllegalStateException("Unable to initialize GLFW.");
         }
 
-        //configure glfw
+        // Configure GLFW
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
-        //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-        //create window
-        glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
+        //glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 
-        if(glfwWindow == NULL)
-            throw new IllegalStateException("Failed to create glfw window.");
+        // Create the window
+        glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
+        if (glfwWindow == NULL) {
+            throw new IllegalStateException("Failed to create the GLFW window.");
+        }
 
         glfwSetCursorPosCallback(glfwWindow, MouseListener::mousePosCallback);
         glfwSetMouseButtonCallback(glfwWindow, MouseListener::mouseButtonCallback);
         glfwSetScrollCallback(glfwWindow, MouseListener::mouseScrollCallback);
         glfwSetKeyCallback(glfwWindow, KeyListener::keyCallback);
-        glfwSetWindowSizeCallback(glfwWindow, (w, newWidth, newHeight)-> {
+        glfwSetWindowSizeCallback(glfwWindow, (w, newWidth, newHeight) -> {
             Window.setWidth(newWidth);
             Window.setHeight(newHeight);
         });
 
+        // Make the OpenGL context current
         glfwMakeContextCurrent(glfwWindow);
-
-        //enable v-sync buffer swapping
+        // Enable v-sync
         glfwSwapInterval(1);
 
-        //Make window visible
+        // Make the window visible
         glfwShowWindow(glfwWindow);
 
         // This line is critical for LWJGL's interoperation with GLFW's
@@ -119,48 +121,46 @@ public class Window {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
         this.imguiLayer = new ImGuiLayer(glfwWindow);
         this.imguiLayer.initImGui();
 
         Window.changeScene(0);
     }
 
-    public void __loop__() {
+    public void loop() {
         float beginTime = (float)glfwGetTime();
         float endTime;
         float dt = -1.0f;
 
-        while(!glfwWindowShouldClose(glfwWindow)) {
-            //Poll events
+        while (!glfwWindowShouldClose(glfwWindow)) {
+            // Poll events
             glfwPollEvents();
 
-            glClearColor(0, 0, 0, 0);
+            glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT);
 
-
-
-            if(KeyListener.isKeyPressed(GLFW_KEY_SPACE))
-                System.out.println("Space is pressed!");
-
-            if(dt >= 0)
+            if (dt >= 0) {
                 currentScene.update(dt);
+            }
 
-            this.imguiLayer.update(dt);
-
+            this.imguiLayer.update(dt, currentScene);
             glfwSwapBuffers(glfwWindow);
 
             endTime = (float)glfwGetTime();
             dt = endTime - beginTime;
             beginTime = endTime;
         }
+
+        currentScene.saveExit();
     }
 
     public static int getWidth() {
         return get().width;
     }
+
     public static int getHeight() {
         return get().height;
     }
@@ -168,6 +168,7 @@ public class Window {
     public static void setWidth(int newWidth) {
         get().width = newWidth;
     }
+
     public static void setHeight(int newHeight) {
         get().height = newHeight;
     }

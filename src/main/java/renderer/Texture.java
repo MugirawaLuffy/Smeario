@@ -13,7 +13,7 @@ public class Texture {
     private int texID;
     private int width, height;
 
-    public Texture(String filepath) {
+    public void __init__(String filepath) {
         this.filepath = filepath;
         //Generate texture on gpu
         texID = glGenTextures();

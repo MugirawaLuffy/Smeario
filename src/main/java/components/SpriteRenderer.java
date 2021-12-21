@@ -1,5 +1,6 @@
 package components;
 
+import imgui.ImGui;
 import jade.Component;
 import jade.Transform;
 import org.joml.Vector2f;
@@ -9,25 +10,23 @@ import renderer.Texture;
 import java.awt.*;
 
 public class SpriteRenderer extends Component {
-    boolean isDirty = false; // dirty flag
+    private Vector4f color = new Vector4f(1, 1, 1, 1);
+    private Sprite sprite = new Sprite();
 
-    private Vector4f color;
+    private transient Transform lastTransform;
+    private transient boolean isDirty = true;
 
-    private Sprite sprite;
-    private Transform lastTransform;
-
-
-    public SpriteRenderer(Vector4f color) {
-        this.color = color;
-        this.sprite = new Sprite(null);
-        this.isDirty = true;
-    }
-
-    public SpriteRenderer(Sprite spr) {
-        this.sprite = spr;
-        this.color = new Vector4f(1, 1, 1, 1);
-        this.isDirty = true;
-    }
+//    public SpriteRenderer(Vector4f color) {
+//        this.color = color;
+//        this.sprite = new Sprite(null);
+//        this.isDirty = true;
+//    }
+//
+//    public SpriteRenderer(Sprite sprite) {
+//        this.sprite = sprite;
+//        this.color = new Vector4f(1, 1, 1, 1);
+//        this.isDirty = true;
+//    }
 
     @Override
     public void start() {
@@ -36,8 +35,17 @@ public class SpriteRenderer extends Component {
 
     @Override
     public void update(float dt) {
-        if(!this.lastTransform.equals(this.gameObject.transform)) { //Transformation has changed
+        if (!this.lastTransform.equals(this.gameObject.transform)) {
             this.gameObject.transform.copy(this.lastTransform);
+            isDirty = true;
+        }
+    }
+
+    @Override
+    public void imgui() {
+        float[] imColor = {color.x, color.y, color.z, color.w};
+        if (ImGui.colorPicker4("Color Picker: ", imColor)) {
+            this.color.set(imColor[0], imColor[1], imColor[2], imColor[3]);
             this.isDirty = true;
         }
     }
@@ -54,14 +62,16 @@ public class SpriteRenderer extends Component {
         return sprite.getTexCoords();
     }
 
-    public void setSprite(Sprite _sprite) {
-        this.sprite = _sprite;
+    public void setSprite(Sprite sprite) {
+        this.sprite = sprite;
         this.isDirty = true;
     }
 
-    public void setColor(Vector4f _color) {
-        if(this.color.equals(color))
+    public void setColor(Vector4f color) {
+        if (!this.color.equals(color)) {
             this.isDirty = true;
+            this.color.set(color);
+        }
     }
 
     public boolean isDirty() {
