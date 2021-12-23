@@ -11,8 +11,24 @@ repositories {
 }
 
 dependencies {
+    //testCompile group: 'junit', name: 'junit', version: '4.13'
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+subprojects {
+    //Put instructions for each sub project
+    apply plugin: "java"
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+
+
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: '4.+'
+    }
 }
 
 test {
@@ -25,6 +41,12 @@ project.ext.lwjglNatives = "natives-windows"
 project.ext.imguiVersion = '1.76-0.9'
 
 dependencies {
+    implementation 'org.testng:testng:7.1.0'
+    implementation 'junit:junit:3.8.2'
+
+    // JUnit
+    testImplementation('junit:junit:4.13')
+
     // GSON
     implementation 'com.google.code.gson:gson:2.8.6'
 

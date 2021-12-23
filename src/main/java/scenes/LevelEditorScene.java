@@ -69,6 +69,7 @@ public class LevelEditorScene extends Scene {
     @Override
     public void update(float dt) {
         levelEditorStuff.update(dt);
+        DebugDraw.addBox2D(new Vector2f(200,200), new Vector2f(64,32), 30, new Vector3f(0,1,0), 1);
 
         for (GameObject go : this.gameObjects) {
             go.update(dt);
