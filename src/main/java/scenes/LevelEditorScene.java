@@ -3,10 +3,7 @@ package scenes;
 import components.*;
 import imgui.ImGui;
 import imgui.ImVec2;
-import jade.Camera;
-import jade.GameObject;
-import jade.Prefabs;
-import jade.Transform;
+import jade.*;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -35,7 +32,8 @@ public class LevelEditorScene extends Scene {
         this.camera = new Camera(new Vector2f(-250, 0));
         sprites = AssetPool.getSpritesheet("assets/images/spritesheets/decorationsAndBlocks.png");
         if (levelLoaded) {
-            this.activeGameObject = gameObjects.get(0);
+            //this.activeGameObject = gameObjects.get(0);
+            this.activeGameObject = null;
             return;
         }
 
@@ -81,7 +79,24 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void imgui() {
-        ImGui.begin("Test window");
+        ImGui.begin("Debug");
+        ImGui.text("Clear color");
+        float[] imColor = {Window.r, Window.g, Window.b, Window.a};
+        if (ImGui.colorPicker4("Color Picker: ", imColor)) {
+            Window.r = imColor[0];
+            Window.g = imColor[1];
+            Window.b = imColor[2];
+            Window.a = imColor[3];
+        }
+        ImGui.text("\nDebugging");
+        boolean drawDebug = Window.get().drawDebugInfo;
+        if(ImGui.checkbox("draw Debug Lines", drawDebug)) {
+            Window.get().drawDebugInfo = !drawDebug;
+        }
+
+        ImGui.end();
+
+        ImGui.begin("Placables");
 
         ImVec2 windowPos = new ImVec2();
         ImGui.getWindowPos(windowPos);

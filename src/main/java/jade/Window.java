@@ -19,8 +19,9 @@ public class Window {
     private long glfwWindow;
     private ImGuiLayer imguiLayer;
 
-    public float r, g, b, a;
+    public static float r, g, b, a;
     private boolean fadeToBlack = false;
+    public boolean drawDebugInfo = true;
 
     private static Window window = null;
 
@@ -148,7 +149,8 @@ public class Window {
             glClear(GL_COLOR_BUFFER_BIT);
 
             if (dt >= 0) {
-                DebugDraw.draw();
+                if(drawDebugInfo)
+                    DebugDraw.draw();
                 currentScene.update(dt);
             }
 
