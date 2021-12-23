@@ -38,9 +38,10 @@ test {
 project.ext.lwjglVersion = "3.3.0"
 project.ext.jomlVersion = "1.10.2"
 project.ext.lwjglNatives = "natives-windows"
-project.ext.imguiVersion = '1.76-0.9'
+project.ext.imguiVersion = '1.77-0.17.1'
 
 dependencies {
+    implementation 'junit:junit:4.13.1'
     implementation 'org.testng:testng:7.1.0'
     implementation 'junit:junit:3.8.2'
 

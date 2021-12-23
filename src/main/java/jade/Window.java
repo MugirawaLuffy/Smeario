@@ -21,9 +21,8 @@ public class Window {
     private ImGuiLayer imguiLayer;
     private Framebuffer framebuffer;
 
-    public static float r, g, b, a;
+    public float r, g, b, a;
     private boolean fadeToBlack = false;
-    public boolean drawDebugInfo = true;
 
     private static Window window = null;
 
@@ -32,7 +31,7 @@ public class Window {
     private Window() {
         this.width = 1920;
         this.height = 1080;
-        this.title = "Smeario - Mario on 2grams of crack";
+        this.title = "Mario";
         r = 1;
         b = 1;
         g = 1;
@@ -133,7 +132,10 @@ public class Window {
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         this.imguiLayer = new ImGuiLayer(glfwWindow);
         this.imguiLayer.initImGui();
+
         this.framebuffer = new Framebuffer(1920, 1080);
+        glViewport(0, 0, 1920, 1080);
+
         Window.changeScene(0);
     }
 
@@ -145,18 +147,19 @@ public class Window {
         while (!glfwWindowShouldClose(glfwWindow)) {
             // Poll events
             glfwPollEvents();
+
             DebugDraw.beginFrame();
 
+            this.framebuffer.bind();
             glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT);
-            this.framebuffer.bind();
 
             if (dt >= 0) {
-                if(drawDebugInfo)
-                    DebugDraw.draw();
+                DebugDraw.draw();
                 currentScene.update(dt);
             }
             this.framebuffer.unbind();
+
             this.imguiLayer.update(dt, currentScene);
             glfwSwapBuffers(glfwWindow);
 
@@ -182,5 +185,13 @@ public class Window {
 
     public static void setHeight(int newHeight) {
         get().height = newHeight;
+    }
+
+    public static Framebuffer getFramebuffer() {
+        return get().framebuffer;
+    }
+
+    public static float getTargetAspectRatio() {
+        return 16.0f / 9.0f;
     }
 }

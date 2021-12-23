@@ -1,29 +1,31 @@
 package jade;
 
+import editor.GameViewWindow;
 import imgui.*;
-import imgui.callbacks.ImStrConsumer;
-import imgui.callbacks.ImStrSupplier;
-import imgui.enums.ImGuiBackendFlags;
-import imgui.enums.ImGuiConfigFlags;
-import imgui.enums.ImGuiKey;
-import imgui.enums.ImGuiMouseCursor;
+import imgui.callback.ImStrConsumer;
+import imgui.callback.ImStrSupplier;
+import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
+import imgui.type.ImBoolean;
 import scenes.Scene;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class ImGuiLayer {
-    long glfwWindow;
+
+    private long glfwWindow;
+
     // Mouse cursors provided by GLFW
     private final long[] mouseCursors = new long[ImGuiMouseCursor.COUNT];
 
     // LWJGL3 renderer (SHOULD be initialized)
     private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 
-    public ImGuiLayer(long _glfwWindow){
-        this.glfwWindow = _glfwWindow;
+    public ImGuiLayer(long glfwWindow) {
+        this.glfwWindow = glfwWindow;
     }
 
+    // Initialize Dear ImGui.
     public void initImGui() {
         // IMPORTANT!!
         // This line is critical for Dear ImGui to work.
@@ -35,6 +37,7 @@ public class ImGuiLayer {
 
         io.setIniFilename("imgui.ini"); // We don't want to save .ini file
         io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard); // Navigation with keyboard
+        io.setConfigFlags(ImGuiConfigFlags.DockingEnable);
         io.setBackendFlags(ImGuiBackendFlags.HasMouseCursors); // Mouse cursors to display while resizing windows etc.
         io.setBackendPlatformName("imgui_java_impl_glfw");
 
@@ -117,7 +120,8 @@ public class ImGuiLayer {
             if (!io.getWantCaptureMouse() && mouseDown[1]) {
                 ImGui.setWindowFocus(null);
             }
-            if (!io.getWantCaptureMouse()) {
+
+            if (!io.getWantCaptureMouse() || GameViewWindow.getWantCaptureMouse()) {
                 MouseListener.mouseButtonCallback(w, button, action, mods);
             }
         });
@@ -146,7 +150,6 @@ public class ImGuiLayer {
             }
         });
 
-
         // ------------------------------------------------------------
         // Fonts configuration
         // Read: https://raw.githubusercontent.com/ocornut/imgui/master/docs/FONTS.txt
@@ -155,19 +158,11 @@ public class ImGuiLayer {
         final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
 
         // Glyphs could be added per-font as well as per config used globally like here
-        fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesCyrillic());
-
-        // Add a default font, which is 'ProggyClean.ttf, 13px'
-        //fontAtlas.addFontDefault();
+        fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesDefault());
 
         // Fonts merge example
-        //fontConfig.setMergeMode(true); // When enabled, all fonts added with this config would be merged with the previously added font
-        //fontConfig.setPixelSnapH(true);
-
-        //fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
-        fontConfig.setPixelSnapH(false);
+        fontConfig.setPixelSnapH(true);
         fontAtlas.addFontFromFileTTF("assets/fonts/rondalo.ttf", 32, fontConfig);
-
 
         fontConfig.destroy(); // After all fonts were added we don't need this config more
 
@@ -179,35 +174,35 @@ public class ImGuiLayer {
         // This method SHOULD be called after you've initialized your ImGui configuration (fonts and so on).
         // ImGui context should be created as well.
         imGuiGl3.init("#version 330 core");
-
     }
+
     public void update(float dt, Scene currentScene) {
         startFrame(dt);
 
+        // Any Dear ImGui code SHOULD go between ImGui.newFrame()/ImGui.render() methods
         ImGui.newFrame();
+        setupDockspace();
         currentScene.sceneImgui();
-
         //ImGui.showDemoWindow();
+        GameViewWindow.imgui();
+        ImGui.end();
         ImGui.render();
 
         endFrame();
     }
 
-
     private void startFrame(final float deltaTime) {
+        // Get window properties and mouse position
         float[] winWidth = {Window.getWidth()};
         float[] winHeight = {Window.getHeight()};
-        // Get window properties and mouse position
         double[] mousePosX = {0};
         double[] mousePosY = {0};
-
-
         glfwGetCursorPos(glfwWindow, mousePosX, mousePosY);
 
         // We SHOULD call those methods to update Dear ImGui state for the current frame
         final ImGuiIO io = ImGui.getIO();
         io.setDisplaySize(winWidth[0], winHeight[0]);
-        io.setDisplayFramebufferScale(1,1);
+        io.setDisplayFramebufferScale(1f, 1f);
         io.setMousePos((float) mousePosX[0], (float) mousePosY[0]);
         io.setDeltaTime(deltaTime);
 
@@ -227,5 +222,23 @@ public class ImGuiLayer {
     private void destroyImGui() {
         imGuiGl3.dispose();
         ImGui.destroyContext();
+    }
+
+    private void setupDockspace() {
+        int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
+
+        ImGui.setNextWindowPos(0.0f, 0.0f, ImGuiCond.Always);
+        ImGui.setNextWindowSize(Window.getWidth(), Window.getHeight());
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
+        windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse |
+                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove |
+                ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
+
+        ImGui.begin("Dockspace Demo", new ImBoolean(true), windowFlags);
+        ImGui.popStyleVar(2);
+
+        // Dockspace
+        ImGui.dockSpace(ImGui.getID("Dockspace"));
     }
 }
